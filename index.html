@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/jpg" href="image/favicon.jpg">
+  <title>Turbo Tribe 2</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 10px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    h3 {
+      color: #555;
+      margin-top: 30px;
+    }
+    .logo-container {
+      display: flex;
+      justify-content: flex-start;
+      padding: 10px 0;
+    }
+    .logo {
+      max-height: 100px; 
+      width: auto;
+    }
+    .chart-container {
+      width: 100%;
+      max-width: 1000px;
+      height: 400px;
+      margin: 0 auto 30px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .legend-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .custom-legend {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+    }
+    .control-button {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #2196F3;
+      color: whitesmoke;
+      text-decoration: none;
+    }
+    .control-button:hover {
+      opacity: 0.8;
+    }
+    .table-container {
+      max-height: 250px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    td.status {
+      color: #e67e22;
+      font-style: italic;
+    }
+    #txStatus {
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #e0f7fa;
+      color: #00796b;
+      font-weight: bold;
+      text-align: center;
+    }
+    #txStatus.error {
+      background-color: #ffebee;
+      color: #c62828;
+    }
+    @media (max-width: 600px) {
+      th, td {
+        padding: 8px;
+        font-size: 14px;
+      }
+      .chart-container {
+        max-width: 100%;
+        height: 300px;
+      }
+      .legend-container {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .custom-legend {
+        justify-content: center;
+      }
+      .logo {
+        max-height: 40px;
+      }
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      position: relative;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: #e67e22;
+    }
+    .qr-image {
+      max-width: 100%;
+      max-height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Logo -->
+  <div class="logo-container">
+    <img src="logo_2.jpg" alt="Logo UTC2" class="logo">
+  </div>
+  <h1>Nông Nghiệp Thông Minh 2025</h1>
+  <!-- Biểu đồ -->
+  <div class="chart-container">
+    <canvas id="sensorChart"></canvas>
+  </div>
+  <!-- Chú thích -->
+  <div class="legend-container">
+    <div class="custom-legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: red;"></div>
+        <span id="temperature-value">Nhiệt độ: -- °C</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: blue;"></div>
+        <span id="humidity-value">Độ ẩm không khí: -- %</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: orange;"></div>
+        <span id="soilpercent-value">Độ ẩm đất: -- %</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #FFD700;"></div>
+        <span id="lightpercent-value">Cường độ ánh sáng: -- %</span>
+      </div>
+      <!-- Nút điều khiển LED -->
+      <a href="http://192.168.87.102/" target="_blank" class="control-button">Điều khiển LED</a>
+      <!-- Thêm nút QR -->
+      <button class="control-button" onclick="openQRModal()">QR</button>
+    </div>
+  </div>
+  <!-- Modal hiển thị hình ảnh QR -->
+  <div id="qrModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeQRModal()">×</span>
+      <img src="qr1.jpg" alt="QR Code" class="qr-image">
+    </div>
+  </div>
+  <!-- Bảng dữ liệu -->
+  <h3>Danh sách dữ liệu cảm biến:</h3>
+  <div class="table-container">
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Thời gian (VN)</th>
+          <th>Nhiệt độ (°C)</th>
+          <th>Độ ẩm không khí (%)</th>
+          <th>Độ ẩm đất (%)</th>
+          <th>Ánh sáng (%)</th>
+          <th>Trạng thái</th>
+        </tr>
+      </thead>
+      <tbody id="dataList"></tbody>
+    </table>
+  </div>
+  <!-- Trạng thái giao dịch -->
+  <h3>Trạng thái giao dịch:</h3>
+  <p id="txStatus">Chưa gửi giao dịch...</p>
+  <!-- Thư viện Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Thư viện Ethers.js -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script>
+    const { ethers } = window;
+    let receivedDataList = [];
+    let processedData = new Set();
+    // Dữ liệu cho biểu đồ
+    let chartData = {
+      labels: [],
+      temperature: [],
+      humidity: [],
+      soilpercent: [],
+      lightpercent: []
+    };
+    // Khởi tạo biểu đồ
+    const ctx = document.getElementById('sensorChart').getContext('2d');
+    const sensorChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartData.labels,
+        datasets: [
+          {
+            label: 'Nhiệt độ (°C)',
+            data: chartData.temperature,
+            borderColor: 'red',
+            fill: false
+          },
+          {
+            label: 'Độ ẩm không khí (%)',
+            data: chartData.humidity,
+            borderColor: 'blue',
+            fill: false
+          },
+          {
+            label: 'Độ ẩm đất (%)',
+            data: chartData.soilpercent,
+            borderColor: 'orange',
+            fill: false
+          },
+          {
+            label: 'Cường độ ánh sáng (%)',
+            data: chartData.lightpercent,
+            borderColor: '#FFD700',
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Thời gian (t)'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Giá trị (D)'
+            },
+            min: 0,
+            max: 100
+          }
+        }
+      }
+    });
+    const rpcUrls = [
+    "https://ethereum-holesky-rpc.publicnode.com"
+  ];
+    function createProvider() {
+      let provider;
+      for (let i = 0; i < rpcUrls.length; i++) {
+        try {
+          provider = new ethers.providers.JsonRpcProvider(rpcUrls[i]);
+          console.log(`Kết nối thành công đến RPC: ${rpcUrls[i]}`);
+          return provider;
+        } catch (error) {
+          console.error(`Không thể kết nối đến RPC ${rpcUrls[i]}:`, error.message);
+          if (i === rpcUrls.length - 1) {
+            throw new Error("Không thể kết nối đến bất kỳ RPC nào.");
+          }
+        }
+      }
+    }
+    const privateKey = "0x33e4dc0b17b3f5db41813a31e3462dcbf6a740f6648d5450f7c4cf23216d28bd";
+    const provider = createProvider();
+    const wallet = new ethers.Wallet(privateKey, provider);
+    // Chuyển đổi timestamp UTC sang giờ Việt Nam (UTC+7)
+    function toVietnamTime(utcTimestamp) {
+      const date = new Date(utcTimestamp);
+      const vietnamTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+      return vietnamTime.toISOString().replace('T', ' ').substring(0, 19);
+    }
+    // Hàm lấy dữ liệu từ server
+    async function fetchData() {
+      try {
+        const response = await fetch('/data', {
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
+        const data = await response.json();
+        const newDataList = data.sensorDataList || [];
+        // Cập nhật bảng dữ liệu
+        const dataListElement = document.getElementById('dataList');
+        dataListElement.innerHTML = '';
+        newDataList.forEach((sensorData, index) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${toVietnamTime(sensorData.timestamp)}</td>
+            <td>${typeof sensorData.temperature === 'number' ? sensorData.temperature.toFixed(1) : 'null'} °C</td>
+            <td>${typeof sensorData.humidity === 'number' ? sensorData.humidity.toFixed(1) : 'null'} %</td>
+            <td>${typeof sensorData.soilpercent === 'number' ? sensorData.soilpercent.toFixed(2) : 'null'} %</td>
+            <td>${typeof sensorData.lightpercent === 'number' ? sensorData.lightpercent.toFixed(0) : 'null'} %</td>
+            <td class="status" id="status-${index}">${
+              processedData.has(JSON.stringify(sensorData)) ? '(Đã gửi)' : '(Chưa gửi)'
+            }</td>
+          `;
+          dataListElement.appendChild(row);
+        });
+        // Giới hạn dữ liệu cho biểu đồ (chỉ lấy 20 giá trị gần nhất)
+        const maxPoints = 20;
+        const chartDataList = newDataList.slice(-maxPoints);
+        // Cập nhật dữ liệu cho biểu đồ
+        chartData.labels = chartDataList.map(data => toVietnamTime(data.timestamp).split(' ')[1]);
+        chartData.temperature = chartDataList.map(data => typeof data.temperature === 'number' ? data.temperature : null);
+        chartData.humidity = chartDataList.map(data => typeof data.humidity === 'number' ? data.humidity : null);
+        chartData.soilpercent = chartDataList.map(data => typeof data.soilpercent === 'number' ? data.soilpercent : null);
+        chartData.lightpercent = chartDataList.map(data => typeof data.lightpercent === 'number' ? data.lightpercent : null);
+        // Cập nhật biểu đồ
+        sensorChart.data.labels = chartData.labels;
+        sensorChart.data.datasets[0].data = chartData.temperature;
+        sensorChart.data.datasets[1].data = chartData.humidity;
+        sensorChart.data.datasets[2].data = chartData.soilpercent;
+        sensorChart.data.datasets[3].data = chartData.lightpercent;
+        sensorChart.update()
+        // Cập nhật giá trị mới nhất trong chú thích
+        if (newDataList.length > 0) {
+          const latestData = newDataList[newDataList.length - 1];
+          document.getElementById('temperature-value').textContent = `Nhiệt độ: ${typeof latestData.temperature === 'number' ? latestData.temperature.toFixed(1) : '--'} °C`;
+          document.getElementById('humidity-value').textContent = `Độ ẩm không khí: ${typeof latestData.humidity === 'number' ? latestData.humidity.toFixed(1) : '--'} %`;
+          document.getElementById('soilpercent-value').textContent = `Độ ẩm đất: ${typeof latestData.soilpercent === 'number' ? latestData.soilpercent.toFixed(2) : '--'} %`;
+          document.getElementById('lightpercent-value').textContent = `Cường độ ánh sáng: ${typeof latestData.lightpercent === 'number' ? latestData.lightpercent.toFixed(0) : '--'} %`;
+        }
+        receivedDataList = newDataList;
+      } catch (error) {
+        console.error('Lỗi khi lấy dữ liệu:', error);
+      }
+    }
+    // Hàm gửi tất cả dữ liệu chưa xử lý lên blockchain
+    async function sendPendingTransactions() {
+      try {
+        const yourAddress = wallet.address;
+        await provider.getNetwork().catch(error => {
+          throw new Error('Không thể kết nối đến mạng Holesky: ' + error.message);
+        });
+        const pendingData = receivedDataList.filter(sensorData => !processedData.has(JSON.stringify(sensorData)));
+        if (pendingData.length === 0) {
+          console.log('Không có dữ liệu mới để gửi.');
+          document.getElementById('txStatus').textContent = 'Không có dữ liệu mới để gửi.';
+          return;
+        }
+        const combinedData = pendingData.map(data => 
+          `${toVietnamTime(data.timestamp)}, Nhiệt độ: ${typeof data.temperature === 'number' ? data.temperature.toFixed(1) : 'null'} °C, Độ ẩm: ${typeof data.humidity === 'number' ? data.humidity.toFixed(1) : 'null'} %, Độ ẩm đất: ${typeof data.soilpercent === 'number' ? data.soilpercent.toFixed(2) : 'null'} %, Ánh sáng: ${typeof data.lightpercent === 'number' ? data.lightpercent.toFixed(0) : 'null'} %`
+        ).join('\n');
+        const hexCombinedData = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(combinedData));
+        const tx = {
+          to: yourAddress,
+          value: ethers.utils.parseEther("0.001"),
+          data: hexCombinedData,
+          gasLimit: 100000 + pendingData.length * 20000,
+        };
+        console.log('Sending combined transaction:', tx);
+        document.getElementById('txStatus').textContent = 'Đang gửi giao dịch...';
+        document.getElementById('txStatus').classList.remove('error');
+        const txResponse = await wallet.sendTransaction(tx);
+        console.log('Transaction sent:', txResponse.hash);
+        document.getElementById('txStatus').textContent = `Đã gửi - TxHash: ${txResponse.hash}`;
+
+        const receipt = await txResponse.wait();
+        console.log('Transaction confirmed:', receipt.transactionHash);
+        document.getElementById('txStatus').textContent = `Xác nhận - TxHash: ${receipt.transactionHash}`;
+
+        pendingData.forEach(sensorData => {
+          const index = receivedDataList.indexOf(sensorData);
+          const statusElement = document.getElementById(`status-${index}`);
+          if (statusElement) {
+            statusElement.textContent = `(Đã gửi - TxHash: ${receipt.transactionHash})`;
+          } else {
+            console.warn(`Không tìm thấy phần tử status-${index}`);
+          }
+          processedData.add(JSON.stringify(sensorData));
+        });
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('txStatus').textContent = `Lỗi: ${error.message}`;
+        document.getElementById('txStatus').classList.add('error');
+      }
+    }
+    // Mở modal QR
+    function openQRModal() {
+      document.getElementById("qrModal").style.display = "flex";
+    }
+    // Đóng modal QR
+    function closeQRModal() {
+      document.getElementById("qrModal").style.display = "none";
+    }
+    // Đóng modal khi nhấn ra ngoài hình ảnh
+    window.onclick = function(event) {
+      const modal = document.getElementById("qrModal");
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+    setInterval(fetchData, 5000);
+    fetchData();
+
+    setInterval(sendPendingTransactions, 60000);
+  </script>
+</body>
+</html>
